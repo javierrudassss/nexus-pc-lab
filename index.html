@@ -684,10 +684,16 @@
                 <span class="font-bold text-xl tracking-wider text-white">NEXUS PC LAB</span>
             </div>
 
-            <button id="portal-back-button" data-section="portal" class="hidden flex justify-self-end items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg border border-slate-700 transition">
-                <i class="fa-solid fa-house text-blue-400"></i>
-                <span class="font-medium text-sm">Volver al Portal Principal</span>
-            </button>
+            <div class="flex justify-self-end items-center gap-2">
+                <button id="account-open-button" type="button" class="flex items-center gap-2 rounded-lg border border-sky-400/30 bg-slate-800 px-3 py-2 text-sky-100 transition hover:border-sky-300/60">
+                    <i class="fa-solid fa-user"></i>
+                    <span class="hidden max-w-[105px] truncate text-sm font-medium sm:block">Mi cuenta</span>
+                </button>
+                <button id="portal-back-button" data-section="portal" class="hidden flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-house text-blue-400"></i>
+                    <span class="font-medium text-sm">Volver al Portal Principal</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -923,17 +929,54 @@
                 </div>
 
                 <aside id="builder-sidebar" class="flex flex-col gap-3">
+                    <section class="rounded-xl border border-sky-400/20 bg-slate-900/90 p-4" aria-labelledby="account-heading">
+                        <div class="flex items-center justify-between gap-2">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-[.2em] text-sky-300">Tu espacio personal</p>
+                                <h3 id="account-heading" class="mt-1 text-sm font-semibold text-white">Cuenta y proyectos</h3>
+                            </div>
+                            <i class="fa-solid fa-user-shield text-xl text-sky-300/70" aria-hidden="true"></i>
+                        </div>
+                        <div id="account-signed-out" class="mt-3">
+                            <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Acceso a tu cuenta">
+                                <button id="account-login-tab" type="button" role="tab" aria-selected="true" class="rounded-md border border-sky-300/50 bg-sky-400/10 px-2 py-2 text-[10px] font-semibold text-sky-100">Iniciar sesión</button>
+                                <button id="account-register-tab" type="button" role="tab" aria-selected="false" class="rounded-md border border-slate-700 px-2 py-2 text-[10px] font-semibold text-slate-300">Crear cuenta</button>
+                            </div>
+                            <form id="account-form" class="mt-3 space-y-2" novalidate>
+                                <label id="account-name-label" for="account-display-name" class="hidden text-[10px] font-semibold text-slate-300">Tu nombre</label>
+                                <input id="account-display-name" type="text" maxlength="60" autocomplete="name" class="hidden w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Ej.: Danilo Rudas">
+                                <label for="account-email" class="block text-[10px] font-semibold text-slate-300">Correo electrónico</label>
+                                <input id="account-email" type="email" maxlength="254" autocomplete="email" required class="w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="tu@correo.com">
+                                <label for="account-password" class="block text-[10px] font-semibold text-slate-300">Contraseña</label>
+                                <input id="account-password" type="password" maxlength="128" autocomplete="current-password" required class="w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Mínimo 12 caracteres al registrarte">
+                                <div id="account-confirm-wrap" class="hidden">
+                                    <label for="account-password-confirm" class="block text-[10px] font-semibold text-slate-300">Confirma la contraseña</label>
+                                    <input id="account-password-confirm" type="password" maxlength="128" autocomplete="new-password" class="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Escríbela de nuevo">
+                                </div>
+                                <button id="account-submit" type="submit" class="w-full rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60">Iniciar sesión</button>
+                            </form>
+                            <p id="account-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Crea una cuenta para guardar tus proyectos de forma privada.</p>
+                        </div>
+                        <div id="account-signed-in" class="hidden mt-3">
+                            <p id="account-user-name" class="text-xs font-semibold text-white"></p>
+                            <p id="account-user-email" class="mt-1 text-[10px] text-slate-400"></p>
+                            <button id="account-logout-button" type="button" class="mt-3 w-full rounded-md border border-slate-700 px-3 py-2 text-[10px] font-semibold text-slate-300 hover:border-rose-300/50 hover:text-rose-200">Cerrar sesión</button>
+                            <p id="account-signed-in-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Solo tú puedes ver los proyectos guardados en esta cuenta.</p>
+                        </div>
+                    </section>
                     <section class="rounded-xl border border-sky-400/20 bg-slate-900/90 p-4" aria-labelledby="saved-projects-heading">
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                <h4 id="saved-projects-heading" class="text-xs font-semibold text-sky-100"><i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sky-300"></i>Proyectos compartidos</h4>
-                                <p class="mt-1 text-[9px] leading-relaxed text-amber-200/80">Públicos: cualquier visitante puede guardar o modificar proyectos.</p>
+                                <h4 id="saved-projects-heading" class="text-xs font-semibold text-sky-100"><i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sky-300"></i>Mis proyectos</h4>
+                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">Privados: solo tú puedes verlos y modificarlos.</p>
                             </div>
-                            <button id="new-project-button" type="button" class="shrink-0 rounded-md border border-slate-700 px-2 py-1 text-[9px] font-semibold text-slate-300 hover:border-sky-300/50">Nuevo</button>
+                            <button id="new-project-button" type="button" class="hidden shrink-0 rounded-md border border-slate-700 px-2 py-1 text-[9px] font-semibold text-slate-300 hover:border-sky-300/50">Nuevo</button>
                         </div>
-                        <label for="project-name" class="mt-3 block text-[10px] font-semibold text-slate-300">Nombre del proyecto</label>
-                        <input id="project-name" type="text" maxlength="80" class="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Ej.: PC para diseño gráfico">
-                        <button id="save-project-button" type="button" class="mt-2 w-full rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto</button>
+                        <div id="projects-manager" class="hidden">
+                            <label for="project-name" class="mt-3 block text-[10px] font-semibold text-slate-300">Nombre del proyecto</label>
+                            <input id="project-name" type="text" maxlength="80" class="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Ej.: PC para diseño gráfico">
+                            <button id="save-project-button" type="button" class="mt-2 w-full rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto</button>
+                        </div>
                         <p id="projects-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Conectando con el servidor…</p>
                         <div id="saved-projects-list" class="mt-2 max-h-40 space-y-1.5 overflow-y-auto" aria-label="Proyectos guardados"></div>
                         <button id="load-more-projects-button" type="button" class="hidden mt-2 w-full rounded-md border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-sky-300/50">Cargar más proyectos</button>
@@ -1263,6 +1306,8 @@
         let currentDevice = 'desktop';
         let selectedProjectId = null;
         let loadedSavedProjects = [];
+        let currentUser = null;
+        let accountMode = 'login';
         let scene;
         let sceneCamera;
         let sceneRenderer;
@@ -4348,6 +4393,151 @@
             status.className = `mt-2 text-[10px] ${isError ? 'text-rose-300' : 'text-slate-400'}`;
         }
 
+        function setAccountStatus(message, isError = false) {
+            const status = document.getElementById('account-status');
+            status.textContent = message;
+            status.className = `mt-2 text-[10px] ${isError ? 'text-rose-300' : 'text-slate-400'}`;
+        }
+
+        function setAccountMode(mode) {
+            accountMode = mode;
+            const registering = mode === 'register';
+            document.getElementById('account-login-tab').setAttribute('aria-selected', String(!registering));
+            document.getElementById('account-register-tab').setAttribute('aria-selected', String(registering));
+            document.getElementById('account-login-tab').className = registering
+                ? 'rounded-md border border-slate-700 px-2 py-2 text-[10px] font-semibold text-slate-300'
+                : 'rounded-md border border-sky-300/50 bg-sky-400/10 px-2 py-2 text-[10px] font-semibold text-sky-100';
+            document.getElementById('account-register-tab').className = registering
+                ? 'rounded-md border border-sky-300/50 bg-sky-400/10 px-2 py-2 text-[10px] font-semibold text-sky-100'
+                : 'rounded-md border border-slate-700 px-2 py-2 text-[10px] font-semibold text-slate-300';
+            document.getElementById('account-name-label').classList.toggle('hidden', !registering);
+            document.getElementById('account-display-name').classList.toggle('hidden', !registering);
+            document.getElementById('account-display-name').required = registering;
+            document.getElementById('account-confirm-wrap').classList.toggle('hidden', !registering);
+            document.getElementById('account-password-confirm').required = registering;
+            document.getElementById('account-password').minLength = registering ? 12 : 1;
+            document.getElementById('account-password').autocomplete = registering ? 'new-password' : 'current-password';
+            document.getElementById('account-submit').textContent = registering ? 'Crear cuenta' : 'Iniciar sesión';
+            setAccountStatus(registering
+                ? 'Usa un correo válido y una contraseña de mínimo 12 caracteres.'
+                : 'Inicia sesión para ver tus proyectos o crea una cuenta nueva.');
+        }
+
+        function updateAccountView() {
+            const signedIn = Boolean(currentUser);
+            document.getElementById('account-signed-out').classList.toggle('hidden', signedIn);
+            document.getElementById('account-signed-in').classList.toggle('hidden', !signedIn);
+            document.getElementById('projects-manager').classList.toggle('hidden', !signedIn);
+            document.getElementById('new-project-button').classList.toggle('hidden', !signedIn);
+            document.getElementById('account-user-name').textContent = currentUser?.displayName || '';
+            document.getElementById('account-user-email').textContent = currentUser?.email || '';
+            document.getElementById('account-signed-in-status').textContent =
+                'Solo tú puedes ver los proyectos guardados en esta cuenta.';
+            document.getElementById('account-open-button').querySelector('span').textContent =
+                currentUser?.displayName || 'Mi cuenta';
+            document.getElementById('account-open-button').setAttribute(
+                'aria-label',
+                currentUser ? `Cuenta de ${currentUser.displayName}` : 'Mi cuenta'
+            );
+            if (!signedIn) {
+                selectedProjectId = null;
+                loadedSavedProjects = [];
+                document.getElementById('saved-projects-list').replaceChildren();
+                document.getElementById('load-more-projects-button').classList.add('hidden');
+                document.getElementById('project-name').value = '';
+                document.getElementById('save-project-button').innerHTML =
+                    '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto';
+                setProjectsStatus('Inicia sesión para ver y guardar tus proyectos.');
+            }
+        }
+
+        async function refreshAccount() {
+            try {
+                const response = await fetch('/api/auth/me');
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                currentUser = result.user;
+                updateAccountView();
+                if (currentUser) {
+                    await refreshSavedProjects();
+                    if (currentUser) setAccountStatus('Sesión activa. Tus proyectos son privados.');
+                }
+            } catch (error) {
+                currentUser = null;
+                updateAccountView();
+                setAccountStatus(`No se pudo comprobar tu sesión: ${error.message}`, true);
+            }
+        }
+
+        async function handleAccountSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('account-email').value.trim();
+            const password = document.getElementById('account-password').value;
+            const displayName = document.getElementById('account-display-name').value.trim();
+            const passwordConfirm = document.getElementById('account-password-confirm').value;
+            const registering = accountMode === 'register';
+            if (registering && password !== passwordConfirm) {
+                setAccountStatus('Las contraseñas no coinciden.', true);
+                document.getElementById('account-password-confirm').focus();
+                return;
+            }
+
+            const button = document.getElementById('account-submit');
+            button.disabled = true;
+            button.textContent = registering ? 'Creando cuenta…' : 'Iniciando sesión…';
+            setAccountStatus('Conectando de forma segura…');
+            try {
+                const response = await fetch(`/api/auth/${registering ? 'register' : 'login'}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registering ? { displayName, email, password } : { email, password })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                currentUser = result.user;
+                document.getElementById('account-password').value = '';
+                document.getElementById('account-password-confirm').value = '';
+                updateAccountView();
+                setAccountStatus(`Hola, ${currentUser.displayName}. Tus proyectos solo son visibles para ti.`);
+                await refreshSavedProjects();
+            } catch (error) {
+                if (error.message.includes('Inicia sesión')) {
+                    currentUser = null;
+                    updateAccountView();
+                    setAccountStatus('Tu sesión expiró. Inicia sesión otra vez.', true);
+                }
+                setAccountStatus(`No se pudo ${registering ? 'crear la cuenta' : 'iniciar sesión'}: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+                button.textContent = accountMode === 'register' ? 'Crear cuenta' : 'Iniciar sesión';
+            }
+        }
+
+        async function logoutAccount() {
+            const button = document.getElementById('account-logout-button');
+            button.disabled = true;
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                currentUser = null;
+                updateAccountView();
+                setAccountMode('login');
+                setAccountStatus('Cerraste sesión correctamente.');
+                document.getElementById('account-email').value = '';
+            } catch (error) {
+                document.getElementById('account-signed-in-status').textContent =
+                    `No se pudo cerrar sesión: ${error.message}`;
+                document.getElementById('account-signed-in-status').className = 'mt-2 text-[10px] text-rose-300';
+            } finally {
+                button.disabled = false;
+            }
+        }
+
         function renderSavedProjects(projects, append = false) {
             const list = document.getElementById('saved-projects-list');
             if (!append) list.replaceChildren();
@@ -4387,7 +4577,7 @@
                         selectedProjectId = project.id;
                         document.getElementById('project-name').value = project.name;
                         document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar cambios';
-                        setProjectsStatus(`Proyecto "${project.name}" abierto. Al guardar se actualizará este proyecto.`);
+                        setProjectsStatus(`Proyecto "${project.name}" abierto. Solo tu cuenta puede editarlo.`);
                     } catch (error) {
                         setProjectsStatus(`No se pudo abrir el proyecto: ${error.message}`, true);
                     }
@@ -4399,11 +4589,19 @@
         }
 
         async function refreshSavedProjects(append = false) {
+            if (!currentUser) return;
             try {
                 const offset = append ? loadedSavedProjects.length : 0;
                 const response = await fetch(`/api/projects?offset=${offset}`);
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        currentUser = null;
+                        updateAccountView();
+                        setAccountStatus('Tu sesión expiró. Inicia sesión otra vez para ver tus proyectos.', true);
+                    }
+                    throw new Error(result.error || `Error HTTP ${response.status}`);
+                }
                 if (!Array.isArray(result.projects) || typeof result.hasMore !== 'boolean') {
                     throw new Error('El servidor devolvió una lista de proyectos no válida.');
                 }
@@ -4413,16 +4611,24 @@
                 renderSavedProjects(result.projects, append);
                 document.getElementById('load-more-projects-button').classList.toggle('hidden', !result.hasMore);
                 setProjectsStatus(loadedSavedProjects.length
-                    ? `${loadedSavedProjects.length} proyecto(s) cargado(s).`
-                    : 'Aún no hay proyectos guardados.');
+                    ? `${loadedSavedProjects.length} proyecto(s) privado(s) cargado(s).`
+                    : 'Aún no tienes proyectos guardados.');
             } catch (error) {
                 document.getElementById('saved-projects-list').replaceChildren();
                 document.getElementById('load-more-projects-button').classList.add('hidden');
+                if (error.message.includes('Inicia sesión')) {
+                    currentUser = null;
+                    updateAccountView();
+                }
                 setProjectsStatus(`No se pudieron cargar los proyectos: ${error.message}`, true);
             }
         }
 
         async function saveCurrentProject() {
+            if (!currentUser) {
+                setProjectsStatus('Inicia sesión o crea una cuenta para guardar proyectos.', true);
+                return;
+            }
             const name = document.getElementById('project-name').value.trim();
             if (!name) {
                 setProjectsStatus('Escribe un nombre antes de guardar el proyecto.', true);
@@ -4432,7 +4638,7 @@
 
             const button = document.getElementById('save-project-button');
             button.disabled = true;
-            setProjectsStatus('Guardando en la base de datos…');
+            setProjectsStatus('Guardando en tus proyectos privados…');
             const components = Object.fromEntries(
                 ['cpu', 'mobo', 'ram', 'gpu', 'psu'].map(part => [
                     part,
@@ -4447,12 +4653,19 @@
                     body: JSON.stringify({ name, device: currentDevice, components })
                 });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        currentUser = null;
+                        updateAccountView();
+                        setAccountStatus('Tu sesión expiró. Inicia sesión otra vez.', true);
+                    }
+                    throw new Error(result.error || `Error HTTP ${response.status}`);
+                }
                 selectedProjectId = result.id;
                 document.getElementById('project-name').value = result.name;
                 button.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar cambios';
                 await refreshSavedProjects();
-                setProjectsStatus(isEditing ? 'Cambios guardados y compartidos.' : 'Proyecto guardado y compartido.');
+                setProjectsStatus(isEditing ? 'Cambios guardados en tu cuenta.' : 'Proyecto guardado en tu cuenta.');
             } catch (error) {
                 setProjectsStatus(`No se pudo guardar el proyecto: ${error.message}`, true);
             } finally {
@@ -4859,6 +5072,18 @@
         document.querySelectorAll('#select-cpu, #select-mobo, #select-ram, #select-gpu, #select-psu').forEach(select => {
             select.addEventListener('change', () => updateBuild(select.id.replace('select-', '')));
         });
+        document.getElementById('account-open-button').addEventListener('click', () => {
+            showSection('modulo1');
+            setBuilderView('components');
+            requestAnimationFrame(() => {
+                document.getElementById('account-heading').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (!currentUser) document.getElementById('account-email').focus({ preventScroll: true });
+            });
+        });
+        document.getElementById('account-login-tab').addEventListener('click', () => setAccountMode('login'));
+        document.getElementById('account-register-tab').addEventListener('click', () => setAccountMode('register'));
+        document.getElementById('account-form').addEventListener('submit', handleAccountSubmit);
+        document.getElementById('account-logout-button').addEventListener('click', logoutAccount);
         document.getElementById('save-project-button').addEventListener('click', saveCurrentProject);
         document.getElementById('load-more-projects-button').addEventListener('click', () => refreshSavedProjects(true));
         document.getElementById('new-project-button').addEventListener('click', () => {
@@ -5056,7 +5281,9 @@
         populateSetupSelect();
         restoreSetupSelection();
         updateBuild();
-        refreshSavedProjects();
+        setAccountMode('login');
+        updateAccountView();
+        refreshAccount();
         setupCatalog.forEach((group, index) => {
             const option = document.createElement('option');
             option.value = String(index);
