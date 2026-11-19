@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: nexus-pc-lab
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexus-pc-lab-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "false"
+
+databases:
+  - name: nexus-pc-lab-db
+    databaseName: nexus_pc_lab
+    user: nexus_pc_lab
+    plan: free
