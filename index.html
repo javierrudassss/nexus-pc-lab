@@ -43,7 +43,8 @@
         #project-save-status { min-width: 0; overflow: hidden; color: #94a3b8; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
         #project-share-button { flex: 0 0 auto; border: 1px solid rgba(167,139,250,.35); border-radius: 8px; background: rgba(124,58,237,.18); padding: 8px 12px; color: #ede9fe; font-size: 12px; font-weight: 700; }
         #project-share-button:hover { border-color: rgba(196,181,253,.65); background: rgba(124,58,237,.32); }
-        #project-share-button:disabled { cursor: not-allowed; opacity: .5; }
+        #project-share-button:disabled { cursor: wait; opacity: .6; }
+        #new-project-panel { max-width: 720px; margin: 0 auto; }
         #shared-project-banner { grid-column: 1 / -1; }
         .scene-panel {
             height: min(76vh, 760px);
@@ -881,7 +882,7 @@
                         <option value="new">Proyecto nuevo</option>
                     </select>
                     <button id="project-save-button" type="button"><i class="fa-solid fa-cloud-arrow-up mr-1.5" aria-hidden="true"></i>Guardar</button>
-                    <button id="project-share-button" type="button" disabled><i class="fa-solid fa-share-nodes mr-1.5" aria-hidden="true"></i>Compartir</button>
+                    <button id="project-share-button" type="button"><i class="fa-solid fa-share-nodes mr-1.5" aria-hidden="true"></i>Compartir</button>
                     <span id="project-save-status" role="status" aria-live="polite">Inicia sesión para guardar tus proyectos</span>
                 </div>
                 <div id="scene-panel" class="scene-panel relative overflow-hidden rounded-xl border border-slate-800">
@@ -1162,7 +1163,7 @@
                             <h3 id="saved-projects-heading" class="text-sm font-bold text-sky-100"><i class="fa-solid fa-folder-open mr-2 text-sky-300"></i>Mis proyectos</h3>
                             <p class="mt-1 text-[11px] leading-relaxed text-slate-400">Selecciona un proyecto para cargarlo en el configurador.</p>
                         </div>
-                        <button id="new-project-button" type="button" class="hidden shrink-0 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-sky-300/50">Nuevo</button>
+                        <button id="new-project-button" type="button" class="hidden shrink-0 rounded-lg border border-sky-300/30 bg-sky-400/10 px-3 py-2 text-xs font-semibold text-sky-100 hover:border-sky-300/60">Nuevo</button>
                     </div>
                     <div id="projects-manager" class="hidden mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-3">
                         <label for="project-name" class="block text-xs font-semibold text-slate-300">Nombre del proyecto</label>
@@ -1184,6 +1185,31 @@
                     <p id="share-link-status" class="mt-2 text-xs text-slate-400" role="status" aria-live="polite"></p>
                 </section>
             </div>
+            <section id="new-project-panel" class="hidden p-5 sm:p-7" aria-labelledby="new-project-heading">
+                <div class="flex items-start gap-3">
+                    <button id="new-project-back-button" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-700 text-slate-300 hover:border-sky-300/50" aria-label="Volver a mis proyectos"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div class="min-w-0">
+                        <p class="text-[10px] font-bold uppercase tracking-[.2em] text-sky-300">Nuevo equipo</p>
+                        <h3 id="new-project-heading" class="mt-1 text-xl font-bold text-white">Crear un proyecto</h3>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-400">Ponle un nombre o deja el que asignamos automáticamente.</p>
+                    </div>
+                </div>
+                <form id="new-project-form" class="mt-5">
+                    <label for="new-project-name" class="block text-xs font-semibold text-slate-300">Nombre del proyecto</label>
+                    <input id="new-project-name" type="text" maxlength="80" required class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-sm text-white outline-none focus:border-sky-300/60">
+                    <button id="create-project-button" type="submit" class="mt-3 w-full rounded-lg bg-sky-600 px-4 py-3 text-sm font-bold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60"><i class="fa-solid fa-plus mr-2"></i>Crear proyecto</button>
+                </form>
+                <div class="my-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-500"><span class="h-px flex-1 bg-slate-800"></span>O pega un enlace que te compartieron<span class="h-px flex-1 bg-slate-800"></span></div>
+                <form id="import-shared-project-form" class="rounded-xl border border-violet-400/20 bg-violet-950/20 p-4">
+                    <label for="import-shared-project-url" class="block text-xs font-semibold text-slate-200">Enlace del proyecto</label>
+                    <p class="mt-1 text-[11px] leading-relaxed text-slate-400">Al abrirlo podrás guardar una copia en tu cuenta y editarla.</p>
+                    <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <input id="import-shared-project-url" type="url" required placeholder="Pega aquí el enlace del proyecto" class="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-sm text-white outline-none focus:border-violet-300/60">
+                        <button id="import-shared-project-button" type="submit" class="shrink-0 rounded-lg bg-violet-600 px-4 py-3 text-xs font-bold text-white hover:bg-violet-500"><i class="fa-solid fa-link mr-1.5"></i>Abrir enlace</button>
+                    </div>
+                    <p id="import-shared-project-status" class="mt-2 text-xs text-slate-400" role="status" aria-live="polite"></p>
+                </form>
+            </section>
         </section>
     </div>
 
@@ -4509,7 +4535,7 @@
             select.disabled = !currentUser || saveInProgress;
             document.getElementById('project-save-button').disabled = !currentUser || saveInProgress;
             const shareButton = document.getElementById('project-share-button');
-            shareButton.disabled = !currentUser || selectedProjectId === null || saveInProgress;
+            shareButton.disabled = saveInProgress;
             shareButton.title = !currentUser
                 ? 'Inicia sesión para compartir proyectos'
                 : selectedProjectId === null ? 'Guarda el proyecto antes de compartirlo' : 'Crear un enlace público';
@@ -4520,14 +4546,14 @@
 
         async function createProjectShareLink() {
             if (!currentUser) {
-                setProjectsStatus('Inicia sesión para compartir un proyecto.', true);
+                setProjectsStatus('Inicia sesión para compartir un proyecto.');
                 openAccountModal();
+                setAccountStatus('Inicia sesión para crear un enlace para compartir tu proyecto.');
                 return;
             }
             if (selectedProjectId === null) {
-                setProjectsStatus('Guarda primero el proyecto para poder compartirlo.');
-                openAccountModal();
-                return;
+                await saveCurrentProject(false);
+                if (selectedProjectId === null) return;
             }
             const button = document.getElementById('project-share-button');
             button.disabled = true;
@@ -4618,9 +4644,13 @@
             }
         }
 
-        async function loadSharedProjectFromUrl() {
-            const token = new URLSearchParams(window.location.search).get('share');
-            if (!token) return;
+        async function openSharedProject(token, fromImportPanel = false) {
+            if (!/^[A-Za-z0-9_-]{43}$/.test(token)) {
+                document.getElementById('import-shared-project-status').textContent =
+                    'El enlace no contiene un código de proyecto válido.';
+                document.getElementById('import-shared-project-status').className = 'mt-2 text-xs text-rose-300';
+                return;
+            }
             sharedProjectToken = token;
             try {
                 const response = await fetch(`/api/shared-projects/${encodeURIComponent(token)}`);
@@ -4651,13 +4681,94 @@
                 document.getElementById('shared-project-banner').classList.remove('hidden');
                 showSection('modulo1');
                 setBuilderView('components');
+                closeAccountModal(false);
+                document.getElementById('account-dialog-content').classList.remove('hidden');
+                document.getElementById('new-project-panel').classList.add('hidden');
+                document.getElementById('import-shared-project-url').value = '';
+                document.getElementById('import-shared-project-status').textContent = '';
             } catch (error) {
-                document.getElementById('shared-project-title').textContent = 'No se pudo abrir el proyecto';
-                document.getElementById('shared-project-description').textContent = error.message;
-                document.getElementById('shared-project-copy-button').classList.add('hidden');
-                document.getElementById('shared-project-banner').classList.remove('hidden');
-                showSection('modulo1');
+                document.getElementById('import-shared-project-status').textContent = error.message;
+                document.getElementById('import-shared-project-status').className = 'mt-2 text-xs text-rose-300';
+                if (!fromImportPanel) {
+                    document.getElementById('shared-project-title').textContent = 'No se pudo abrir el proyecto';
+                    document.getElementById('shared-project-description').textContent = error.message;
+                    document.getElementById('shared-project-copy-button').classList.add('hidden');
+                    document.getElementById('shared-project-banner').classList.remove('hidden');
+                    showSection('modulo1');
+                }
             }
+        }
+
+        async function loadSharedProjectFromUrl() {
+            const token = new URLSearchParams(window.location.search).get('share');
+            if (token) await openSharedProject(token);
+        }
+
+        function showNewProjectPanel() {
+            if (!currentUser) {
+                openAccountModal();
+                setAccountStatus('Inicia sesión para crear y guardar un proyecto.');
+                return;
+            }
+            document.getElementById('account-dialog-content').classList.add('hidden');
+            document.getElementById('new-project-panel').classList.remove('hidden');
+            document.getElementById('new-project-name').value = `Proyecto #${savedProjectCount + 1}`;
+            document.getElementById('import-shared-project-url').value = '';
+            document.getElementById('import-shared-project-status').textContent = '';
+            document.getElementById('new-project-name').focus();
+        }
+
+        function returnFromNewProjectPanel() {
+            document.getElementById('new-project-panel').classList.add('hidden');
+            document.getElementById('account-dialog-content').classList.remove('hidden');
+            document.getElementById('new-project-button').focus();
+        }
+
+        async function createProjectFromPanel(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-project-name').value.trim()
+                || `Proyecto #${savedProjectCount + 1}`;
+            returnFromNewProjectPanel();
+            startNewProject(name);
+            await saveCurrentProject(false);
+        }
+
+        async function importSharedProjectFromPanel(event) {
+            event.preventDefault();
+            const status = document.getElementById('import-shared-project-status');
+            const value = document.getElementById('import-shared-project-url').value.trim();
+            let sharedUrl;
+            try {
+                sharedUrl = new URL(value);
+            } catch {
+                status.textContent = 'Pega el enlace completo del proyecto compartido.';
+                status.className = 'mt-2 text-xs text-rose-300';
+                return;
+            }
+            const allowedOrigins = new Set([window.location.origin, 'https://nexus-pc-lab.onrender.com']);
+            if (sharedUrl.protocol !== 'https:' && sharedUrl.origin !== window.location.origin) {
+                status.textContent = 'El enlace debe usar una conexión segura (https).';
+                status.className = 'mt-2 text-xs text-rose-300';
+                return;
+            }
+            if (!allowedOrigins.has(sharedUrl.origin)) {
+                status.textContent = 'Ese enlace no pertenece al sitio oficial de Nexus PC Lab.';
+                status.className = 'mt-2 text-xs text-rose-300';
+                return;
+            }
+            const token = sharedUrl.searchParams.get('share');
+            if (!token) {
+                status.textContent = 'El enlace no contiene un código de proyecto compartido.';
+                status.className = 'mt-2 text-xs text-rose-300';
+                return;
+            }
+            if (sharedUrl.origin !== window.location.origin) {
+                window.location.assign(sharedUrl.toString());
+                return;
+            }
+            status.textContent = 'Abriendo proyecto…';
+            status.className = 'mt-2 text-xs text-slate-400';
+            await openSharedProject(token, true);
         }
 
         function scheduleProjectAutosave() {
@@ -4704,11 +4815,11 @@
             }
         }
 
-        function startNewProject() {
+        function startNewProject(projectName = `Proyecto #${savedProjectCount + 1}`) {
             if (autosaveTimer) clearTimeout(autosaveTimer);
             autosaveTimer = null;
             selectedProjectId = null;
-            document.getElementById('project-name').value = `Proyecto #${savedProjectCount + 1}`;
+            document.getElementById('project-name').value = projectName;
             document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto actual';
             document.getElementById('share-url-input').value = '';
             document.getElementById('share-panel').classList.add('hidden');
@@ -5049,6 +5160,7 @@
                 button.disabled = false;
                 toolbarButton.disabled = !currentUser;
                 document.getElementById('current-project-select').disabled = !currentUser;
+                document.getElementById('project-share-button').disabled = false;
                 if (autosavePending) {
                     autosavePending = false;
                     scheduleProjectAutosave();
@@ -5530,7 +5642,10 @@
         document.getElementById('account-logout-button').addEventListener('click', logoutAccount);
         document.getElementById('save-project-button').addEventListener('click', () => saveCurrentProject(false));
         document.getElementById('load-more-projects-button').addEventListener('click', () => refreshSavedProjects(true));
-        document.getElementById('new-project-button').addEventListener('click', startNewProject);
+        document.getElementById('new-project-button').addEventListener('click', showNewProjectPanel);
+        document.getElementById('new-project-back-button').addEventListener('click', returnFromNewProjectPanel);
+        document.getElementById('new-project-form').addEventListener('submit', createProjectFromPanel);
+        document.getElementById('import-shared-project-form').addEventListener('submit', importSharedProjectFromPanel);
         document.getElementById('chat-form').addEventListener('submit', handleChatSubmit);
         const assistantWelcomeMessage = '¡Hola! Soy tu asistente. Te ayudaré a elegir y revisar los componentes de tu PC.';
         document.getElementById('portal-assistant-listen').addEventListener('click', () => announceAssistant(assistantWelcomeMessage));
