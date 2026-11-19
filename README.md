@@ -1,6 +1,8 @@
 # Nexus PC Lab
 
-El sitio usa Node.js y PostgreSQL. Las personas pueden crear una cuenta e iniciar sesión; cada cuenta solo puede ver y editar sus propios proyectos. Los proyectos conservan el nombre, tipo de equipo y los identificadores seleccionados de CPU, placa, RAM, gráfica y alimentación. El montaje visual 3D y los GLB locales no se guardan en la base de datos.
+El sitio usa Node.js y PostgreSQL. Las personas pueden crear una cuenta e iniciar sesión; cada cuenta solo puede ver y editar sus propios proyectos. Los proyectos conservan el nombre, tipo de equipo y los identificadores seleccionados de CPU, placa, RAM, gráfica y alimentación. Los cambios se guardan automáticamente y también se pueden guardar con el botón **Guardar**. Si no se escribe un nombre, se asigna `Proyecto #1`, `Proyecto #2` y así sucesivamente.
+
+Los proyectos guardados se pueden compartir mediante un enlace público. Cualquier persona que tenga el enlace puede ver la configuración y guardarla como copia editable en su propia cuenta; los cambios en esa copia no afectan el proyecto original. El propietario puede desactivar el enlace o generar uno nuevo desde **Compartir**. El montaje visual 3D y los GLB locales no se guardan en la base de datos.
 
 Las contraseñas se guardan con hash scrypt, no como texto. Las sesiones usan cookies `HttpOnly`, `SameSite=Lax` y una tabla de PostgreSQL. El registro y el inicio de sesión tienen límites de intentos.
 

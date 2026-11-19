@@ -28,6 +28,23 @@
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
         #builder-workspace { --accent: #67e8f9; }
+        body.account-modal-open { overflow: hidden; }
+        #account-modal-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(2, 6, 12, .78); backdrop-filter: blur(8px); }
+        #account-modal-backdrop[aria-hidden="true"] { display: none; }
+        #account-dialog { width: min(820px, 100%); max-height: min(88vh, 820px); overflow-y: auto; border: 1px solid rgba(103,232,249,.25); border-radius: 18px; background: linear-gradient(145deg, rgba(17,30,43,.98), rgba(7,13,22,.99)); box-shadow: 0 24px 80px rgba(0,0,0,.62); }
+        #account-dialog-content { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 14px; padding: 18px; }
+        #saved-projects-list { max-height: min(30vh, 260px); overflow-y: auto; }
+        .saved-project-card { width: 100%; min-height: 54px; text-align: left; }
+        #project-toolbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-width: 0; border: 1px solid rgba(103,232,249,.18); border-radius: 12px; padding: 9px 12px; background: rgba(15,23,42,.94); }
+        #current-project-select { min-width: 0; max-width: min(420px, 60vw); border: 1px solid #334155; border-radius: 8px; background: #080d13; padding: 8px 34px 8px 10px; color: #f1f5f9; font-size: 13px; font-weight: 700; }
+        #project-save-button { flex: 0 0 auto; border: 1px solid rgba(103,232,249,.35); border-radius: 8px; background: rgba(8,145,178,.2); padding: 8px 12px; color: #cffafe; font-size: 12px; font-weight: 700; }
+        #project-save-button:hover { border-color: rgba(103,232,249,.65); background: rgba(8,145,178,.35); }
+        #project-save-button:disabled { cursor: wait; opacity: .6; }
+        #project-save-status { min-width: 0; overflow: hidden; color: #94a3b8; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+        #project-share-button { flex: 0 0 auto; border: 1px solid rgba(167,139,250,.35); border-radius: 8px; background: rgba(124,58,237,.18); padding: 8px 12px; color: #ede9fe; font-size: 12px; font-weight: 700; }
+        #project-share-button:hover { border-color: rgba(196,181,253,.65); background: rgba(124,58,237,.32); }
+        #project-share-button:disabled { cursor: not-allowed; opacity: .5; }
+        #shared-project-banner { grid-column: 1 / -1; }
         .scene-panel {
             height: min(76vh, 760px);
             min-height: 560px;
@@ -262,6 +279,19 @@
             .scene-controls { right: 12px; bottom: 54px; }
             #builder-workspace:fullscreen { padding: 8px; gap: 8px; }
             #builder-workspace:fullscreen .scene-panel { min-height: 42vh; flex-basis: 42vh; }
+            #account-modal-backdrop { align-items: flex-end; padding: 8px; }
+            #account-dialog { width: 100%; max-height: 92vh; max-height: 92dvh; border-radius: 16px 16px 10px 10px; }
+            #account-dialog-content { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 12px; }
+            #saved-projects-list { max-height: 24vh; }
+            #app-header-content { height: 58px; padding-right: 10px; padding-left: 10px; }
+            #account-open-button { padding: 8px 9px; }
+            #account-open-button span { display: block; max-width: 72px; font-size: 11px; }
+            #brand-name { font-size: 14px; letter-spacing: .06em; }
+            #project-toolbar { flex-wrap: wrap; gap: 7px; padding: 8px; }
+            #current-project-select { flex: 1 1 150px; max-width: none; font-size: 12px; }
+            #project-save-button { padding: 8px 10px; }
+            #project-share-button { padding: 8px 10px; }
+            #project-save-status { flex: 1 1 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
@@ -677,17 +707,17 @@
 
     <!-- BARRA DE NAVEGACIÓN SUPERIOR (FIJA) -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 grid grid-cols-[1fr_auto_1fr] items-center">
+        <div id="app-header-content" class="max-w-7xl mx-auto px-4 h-16 grid grid-cols-[1fr_auto_1fr] items-center">
             <div></div>
             <div class="flex items-center justify-center space-x-3">
                 <i class="fa-solid fa-microchip text-blue-500 text-2xl"></i>
-                <span class="font-bold text-xl tracking-wider text-white">NEXUS PC LAB</span>
+                <span id="brand-name" class="font-bold text-xl tracking-wider text-white">NEXUS PC LAB</span>
             </div>
 
             <div class="flex justify-self-end items-center gap-2">
-                <button id="account-open-button" type="button" class="flex items-center gap-2 rounded-lg border border-sky-400/30 bg-slate-800 px-3 py-2 text-sky-100 transition hover:border-sky-300/60">
+                <button id="account-open-button" type="button" aria-haspopup="dialog" aria-controls="account-dialog" aria-expanded="false" class="flex items-center gap-2 rounded-lg border border-sky-400/30 bg-slate-800 px-3 py-2 text-sky-100 transition hover:border-sky-300/60">
                     <i class="fa-solid fa-user"></i>
-                    <span class="hidden max-w-[105px] truncate text-sm font-medium sm:block">Mi cuenta</span>
+                    <span class="max-w-[105px] truncate text-xs font-medium sm:text-sm">Mi cuenta</span>
                 </button>
                 <button id="portal-back-button" data-section="portal" class="hidden flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg border border-slate-700 transition">
                     <i class="fa-solid fa-house text-blue-400"></i>
@@ -837,6 +867,23 @@
             </div>
 
             <div id="builder-workspace" class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_440px] gap-4">
+                <section id="shared-project-banner" class="hidden flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-400/30 bg-violet-950/40 p-3" aria-live="polite">
+                    <div class="min-w-0">
+                        <p id="shared-project-title" class="truncate text-sm font-bold text-violet-100">Proyecto compartido</p>
+                        <p id="shared-project-description" class="mt-1 text-xs text-slate-300">Guarda una copia en tu cuenta para editarla.</p>
+                    </div>
+                    <button id="shared-project-copy-button" type="button" class="shrink-0 rounded-lg bg-violet-600 px-3 py-2.5 text-xs font-bold text-white hover:bg-violet-500"><i class="fa-solid fa-copy mr-1.5" aria-hidden="true"></i>Guardar una copia para editar</button>
+                </section>
+                <div id="project-toolbar" aria-label="Proyecto actual">
+                    <i class="fa-solid fa-folder-open text-cyan-300" aria-hidden="true"></i>
+                    <label class="sr-only" for="current-project-select">Cambiar proyecto</label>
+                    <select id="current-project-select" aria-label="Nombre y selector de proyecto">
+                        <option value="new">Proyecto nuevo</option>
+                    </select>
+                    <button id="project-save-button" type="button"><i class="fa-solid fa-cloud-arrow-up mr-1.5" aria-hidden="true"></i>Guardar</button>
+                    <button id="project-share-button" type="button" disabled><i class="fa-solid fa-share-nodes mr-1.5" aria-hidden="true"></i>Compartir</button>
+                    <span id="project-save-status" role="status" aria-live="polite">Inicia sesión para guardar tus proyectos</span>
+                </div>
                 <div id="scene-panel" class="scene-panel relative overflow-hidden rounded-xl border border-slate-800">
                     <canvas id="builder-canvas" aria-label="Modelo 3D interactivo del dispositivo y sus componentes"></canvas>
                     <div id="component-browser-placeholder" class="items-center justify-center gap-3 bg-[#080d13] px-8 text-center">
@@ -929,58 +976,6 @@
                 </div>
 
                 <aside id="builder-sidebar" class="flex flex-col gap-3">
-                    <section class="rounded-xl border border-sky-400/20 bg-slate-900/90 p-4" aria-labelledby="account-heading">
-                        <div class="flex items-center justify-between gap-2">
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-[.2em] text-sky-300">Tu espacio personal</p>
-                                <h3 id="account-heading" class="mt-1 text-sm font-semibold text-white">Cuenta y proyectos</h3>
-                            </div>
-                            <i class="fa-solid fa-user-shield text-xl text-sky-300/70" aria-hidden="true"></i>
-                        </div>
-                        <div id="account-signed-out" class="mt-3">
-                            <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Acceso a tu cuenta">
-                                <button id="account-login-tab" type="button" role="tab" aria-selected="true" class="rounded-md border border-sky-300/50 bg-sky-400/10 px-2 py-2 text-[10px] font-semibold text-sky-100">Iniciar sesión</button>
-                                <button id="account-register-tab" type="button" role="tab" aria-selected="false" class="rounded-md border border-slate-700 px-2 py-2 text-[10px] font-semibold text-slate-300">Crear cuenta</button>
-                            </div>
-                            <form id="account-form" class="mt-3 space-y-2" novalidate>
-                                <label id="account-name-label" for="account-display-name" class="hidden text-[10px] font-semibold text-slate-300">Tu nombre</label>
-                                <input id="account-display-name" type="text" maxlength="60" autocomplete="name" class="hidden w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Ej.: Danilo Rudas">
-                                <label for="account-email" class="block text-[10px] font-semibold text-slate-300">Correo electrónico</label>
-                                <input id="account-email" type="email" maxlength="254" autocomplete="email" required class="w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="tu@correo.com">
-                                <label for="account-password" class="block text-[10px] font-semibold text-slate-300">Contraseña</label>
-                                <input id="account-password" type="password" maxlength="128" autocomplete="current-password" required class="w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Mínimo 12 caracteres al registrarte">
-                                <div id="account-confirm-wrap" class="hidden">
-                                    <label for="account-password-confirm" class="block text-[10px] font-semibold text-slate-300">Confirma la contraseña</label>
-                                    <input id="account-password-confirm" type="password" maxlength="128" autocomplete="new-password" class="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Escríbela de nuevo">
-                                </div>
-                                <button id="account-submit" type="submit" class="w-full rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60">Iniciar sesión</button>
-                            </form>
-                            <p id="account-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Crea una cuenta para guardar tus proyectos de forma privada.</p>
-                        </div>
-                        <div id="account-signed-in" class="hidden mt-3">
-                            <p id="account-user-name" class="text-xs font-semibold text-white"></p>
-                            <p id="account-user-email" class="mt-1 text-[10px] text-slate-400"></p>
-                            <button id="account-logout-button" type="button" class="mt-3 w-full rounded-md border border-slate-700 px-3 py-2 text-[10px] font-semibold text-slate-300 hover:border-rose-300/50 hover:text-rose-200">Cerrar sesión</button>
-                            <p id="account-signed-in-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Solo tú puedes ver los proyectos guardados en esta cuenta.</p>
-                        </div>
-                    </section>
-                    <section class="rounded-xl border border-sky-400/20 bg-slate-900/90 p-4" aria-labelledby="saved-projects-heading">
-                        <div class="flex items-start justify-between gap-2">
-                            <div>
-                                <h4 id="saved-projects-heading" class="text-xs font-semibold text-sky-100"><i class="fa-solid fa-cloud-arrow-up mr-1.5 text-sky-300"></i>Mis proyectos</h4>
-                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">Privados: solo tú puedes verlos y modificarlos.</p>
-                            </div>
-                            <button id="new-project-button" type="button" class="hidden shrink-0 rounded-md border border-slate-700 px-2 py-1 text-[9px] font-semibold text-slate-300 hover:border-sky-300/50">Nuevo</button>
-                        </div>
-                        <div id="projects-manager" class="hidden">
-                            <label for="project-name" class="mt-3 block text-[10px] font-semibold text-slate-300">Nombre del proyecto</label>
-                            <input id="project-name" type="text" maxlength="80" class="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs text-white outline-none focus:border-sky-300/60" placeholder="Ej.: PC para diseño gráfico">
-                            <button id="save-project-button" type="button" class="mt-2 w-full rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto</button>
-                        </div>
-                        <p id="projects-status" class="mt-2 text-[10px] text-slate-400" role="status" aria-live="polite">Conectando con el servidor…</p>
-                        <div id="saved-projects-list" class="mt-2 max-h-40 space-y-1.5 overflow-y-auto" aria-label="Proyectos guardados"></div>
-                        <button id="load-more-projects-button" type="button" class="hidden mt-2 w-full rounded-md border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-sky-300/50">Cargar más proyectos</button>
-                    </section>
                     <section id="component-panel" class="rounded-xl border border-slate-800 bg-slate-900/90 p-4">
                         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                             <div><p class="text-[10px] font-bold uppercase tracking-[.2em] text-lime-300">Tu configuración</p><h3 id="builder-view-heading" class="mt-1 text-sm font-semibold text-white">Componentes del equipo</h3></div>
@@ -1119,6 +1114,78 @@
         </section>
 
     </main>
+
+    <div id="account-modal-backdrop" aria-hidden="true">
+        <section id="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-heading" tabindex="-1">
+            <header class="flex items-center justify-between gap-4 border-b border-slate-700/80 px-5 py-4">
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-[.2em] text-sky-300">Tu espacio personal</p>
+                    <h2 id="account-heading" class="mt-1 text-lg font-bold text-white">Cuenta y proyectos</h2>
+                    <p class="mt-1 text-xs text-slate-400">Inicia sesión para guardar tus configuraciones y verlas cuando quieras.</p>
+                </div>
+                <button id="account-close-button" type="button" class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-700 text-slate-300 hover:border-sky-300/50 hover:text-white" aria-label="Cerrar cuenta"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div id="account-dialog-content">
+                <section class="rounded-xl border border-sky-400/20 bg-slate-950/60 p-4" aria-label="Acceso a tu cuenta">
+                    <div id="account-signed-out">
+                        <div class="grid grid-cols-2 gap-2" role="tablist" aria-label="Acceso a tu cuenta">
+                            <button id="account-login-tab" type="button" role="tab" aria-selected="true" class="rounded-lg border border-sky-300/50 bg-sky-400/10 px-3 py-2.5 text-xs font-semibold text-sky-100">Iniciar sesión</button>
+                            <button id="account-register-tab" type="button" role="tab" aria-selected="false" class="rounded-lg border border-slate-700 px-3 py-2.5 text-xs font-semibold text-slate-300">Crear cuenta</button>
+                        </div>
+                        <form id="account-form" class="mt-4 space-y-3" novalidate>
+                            <label id="account-name-label" for="account-display-name" class="hidden text-xs font-semibold text-slate-300">Tu nombre</label>
+                            <input id="account-display-name" type="text" maxlength="60" autocomplete="name" class="hidden w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-sky-300/60" placeholder="Ej.: Danilo Rudas">
+                            <label for="account-email" class="block text-xs font-semibold text-slate-300">Correo electrónico</label>
+                            <input id="account-email" type="email" maxlength="254" autocomplete="email" required class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-sky-300/60" placeholder="tu@correo.com">
+                            <label for="account-password" class="block text-xs font-semibold text-slate-300">Contraseña</label>
+                            <input id="account-password" type="password" maxlength="128" autocomplete="current-password" required class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-sky-300/60" placeholder="La contraseña de tu cuenta">
+                            <div id="account-confirm-wrap" class="hidden">
+                                <label for="account-password-confirm" class="block text-xs font-semibold text-slate-300">Confirma la contraseña</label>
+                                <input id="account-password-confirm" type="password" maxlength="128" autocomplete="new-password" class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-sky-300/60" placeholder="Escríbela de nuevo">
+                            </div>
+                            <p id="account-password-help" class="text-[11px] leading-relaxed text-slate-400">Si aún no tienes cuenta, elige “Crear cuenta”. Necesitarás una contraseña de mínimo 12 caracteres.</p>
+                            <button id="account-submit" type="submit" class="w-full rounded-lg bg-sky-600 px-3 py-3 text-sm font-bold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60">Iniciar sesión</button>
+                        </form>
+                        <p id="account-status" class="mt-3 text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">Inicia sesión para ver tus proyectos o crea una cuenta nueva.</p>
+                    </div>
+                    <div id="account-signed-in" class="hidden">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full border border-sky-300/30 bg-sky-400/10 text-xl text-sky-200"><i class="fa-solid fa-user"></i></div>
+                        <p id="account-user-name" class="mt-3 text-base font-semibold text-white"></p>
+                        <p id="account-user-email" class="mt-1 break-all text-xs text-slate-400"></p>
+                        <p id="account-signed-in-status" class="mt-4 text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">Solo tú puedes ver los proyectos guardados en esta cuenta.</p>
+                        <button id="account-logout-button" type="button" class="mt-4 w-full rounded-lg border border-slate-700 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:border-rose-300/50 hover:text-rose-200">Cerrar sesión</button>
+                    </div>
+                </section>
+                <section class="rounded-xl border border-slate-700 bg-slate-950/60 p-4" aria-labelledby="saved-projects-heading">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 id="saved-projects-heading" class="text-sm font-bold text-sky-100"><i class="fa-solid fa-folder-open mr-2 text-sky-300"></i>Mis proyectos</h3>
+                            <p class="mt-1 text-[11px] leading-relaxed text-slate-400">Selecciona un proyecto para cargarlo en el configurador.</p>
+                        </div>
+                        <button id="new-project-button" type="button" class="hidden shrink-0 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-sky-300/50">Nuevo</button>
+                    </div>
+                    <div id="projects-manager" class="hidden mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+                        <label for="project-name" class="block text-xs font-semibold text-slate-300">Nombre del proyecto</label>
+                        <input id="project-name" type="text" maxlength="80" class="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-sky-300/60" placeholder="Ej.: PC para diseño gráfico">
+                        <button id="save-project-button" type="button" class="mt-2 w-full rounded-lg bg-sky-600 px-3 py-2.5 text-xs font-bold text-white hover:bg-sky-500 disabled:cursor-wait disabled:opacity-60"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto actual</button>
+                    </div>
+                    <p id="projects-status" class="mt-3 text-xs leading-relaxed text-slate-400" role="status" aria-live="polite">Inicia sesión para ver y guardar tus proyectos.</p>
+                    <div id="saved-projects-list" class="mt-3 space-y-2" aria-label="Proyectos guardados"></div>
+                    <button id="load-more-projects-button" type="button" class="hidden mt-2 w-full rounded-lg border border-slate-700 px-3 py-2.5 text-xs font-semibold text-slate-300 hover:border-sky-300/50">Cargar más proyectos</button>
+                </section>
+                <section id="share-panel" class="hidden rounded-xl border border-violet-400/25 bg-violet-950/20 p-4" aria-labelledby="share-panel-heading">
+                    <h3 id="share-panel-heading" class="text-sm font-bold text-violet-100"><i class="fa-solid fa-share-nodes mr-2 text-violet-300"></i>Compartir proyecto</h3>
+                    <p class="mt-1 text-[11px] leading-relaxed text-slate-300">Cualquier persona con el enlace puede ver la configuración y guardar su propia copia para editarla. Tu proyecto original no se modifica.</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <input id="share-url-input" type="url" readonly class="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200" aria-label="Enlace del proyecto compartido" placeholder="Genera un enlace para compartir">
+                        <button id="copy-share-link-button" type="button" class="rounded-lg border border-violet-300/30 px-3 py-2 text-xs font-semibold text-violet-100 hover:bg-violet-400/10">Copiar enlace</button>
+                        <button id="revoke-share-link-button" type="button" class="rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-200 hover:bg-rose-400/10">Desactivar enlace</button>
+                    </div>
+                    <p id="share-link-status" class="mt-2 text-xs text-slate-400" role="status" aria-live="polite"></p>
+                </section>
+            </div>
+        </section>
+    </div>
 
     <!-- FOOTER -->
     <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
@@ -1306,6 +1373,13 @@
         let currentDevice = 'desktop';
         let selectedProjectId = null;
         let loadedSavedProjects = [];
+        let savedProjectCount = 0;
+        let autosaveTimer = null;
+        let saveInProgress = false;
+        let autosavePending = false;
+        let suppressAutosave = false;
+        let pendingShareToken = null;
+        let sharedProjectToken = null;
         let currentUser = null;
         let accountMode = 'login';
         let scene;
@@ -4393,6 +4467,271 @@
             status.className = `mt-2 text-[10px] ${isError ? 'text-rose-300' : 'text-slate-400'}`;
         }
 
+        function setProjectSaveStatus(message, isError = false) {
+            const status = document.getElementById('project-save-status');
+            status.textContent = message;
+            status.className = `min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] ${isError ? 'text-rose-300' : 'text-slate-400'}`;
+        }
+
+        function setShareStatus(message, isError = false) {
+            const status = document.getElementById('share-link-status');
+            status.textContent = message;
+            status.className = `mt-2 text-xs ${isError ? 'text-rose-300' : 'text-slate-400'}`;
+        }
+
+        function updateProjectSwitcher() {
+            const select = document.getElementById('current-project-select');
+            const selectedValue = selectedProjectId === null ? 'new' : String(selectedProjectId);
+            select.replaceChildren();
+            const newOption = document.createElement('option');
+            newOption.value = 'new';
+            const nextProjectName = `Proyecto #${savedProjectCount + 1}`;
+            newOption.textContent = selectedProjectId === null
+                ? (document.getElementById('project-name').value.trim() || nextProjectName)
+                : `＋ ${nextProjectName}`;
+            select.appendChild(newOption);
+            loadedSavedProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = String(project.id);
+                option.textContent = project.name;
+                select.appendChild(option);
+            });
+            select.value = [...select.options].some(option => option.value === selectedValue)
+                ? selectedValue
+                : 'new';
+            if (selectedProjectId !== null && select.value === 'new') {
+                const option = document.createElement('option');
+                option.value = selectedValue;
+                option.textContent = document.getElementById('project-name').value.trim() || 'Proyecto';
+                select.appendChild(option);
+                select.value = selectedValue;
+            }
+            select.disabled = !currentUser || saveInProgress;
+            document.getElementById('project-save-button').disabled = !currentUser || saveInProgress;
+            const shareButton = document.getElementById('project-share-button');
+            shareButton.disabled = !currentUser || selectedProjectId === null || saveInProgress;
+            shareButton.title = !currentUser
+                ? 'Inicia sesión para compartir proyectos'
+                : selectedProjectId === null ? 'Guarda el proyecto antes de compartirlo' : 'Crear un enlace público';
+            setProjectSaveStatus(currentUser
+                ? selectedProjectId === null ? 'Autoguardado activo' : 'Proyecto guardado'
+                : 'Inicia sesión para guardar tus proyectos');
+        }
+
+        async function createProjectShareLink() {
+            if (!currentUser) {
+                setProjectsStatus('Inicia sesión para compartir un proyecto.', true);
+                openAccountModal();
+                return;
+            }
+            if (selectedProjectId === null) {
+                setProjectsStatus('Guarda primero el proyecto para poder compartirlo.');
+                openAccountModal();
+                return;
+            }
+            const button = document.getElementById('project-share-button');
+            button.disabled = true;
+            try {
+                const response = await fetch(`/api/projects/${selectedProjectId}/share`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                if (typeof result.token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(result.token)) {
+                    throw new Error('El servidor devolvió un enlace compartido no válido.');
+                }
+                const shareUrl = new URL('/', window.location.origin);
+                shareUrl.searchParams.set('share', result.token);
+                document.getElementById('share-url-input').value = shareUrl.toString();
+                document.getElementById('share-panel').classList.remove('hidden');
+                setShareStatus('Enlace activo. Las personas que lo reciban podrán ver y guardar una copia editable.');
+                setProjectsStatus('Enlace creado. Puedes copiarlo y enviarlo.');
+                openAccountModal();
+                requestAnimationFrame(() => document.getElementById('share-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+            } catch (error) {
+                setProjectsStatus(`No se pudo crear el enlace: ${error.message}`, true);
+                setShareStatus(`No se pudo crear el enlace: ${error.message}`, true);
+            } finally {
+                updateProjectSwitcher();
+            }
+        }
+
+        async function revokeProjectShareLink() {
+            if (!currentUser || selectedProjectId === null) return;
+            const button = document.getElementById('revoke-share-link-button');
+            button.disabled = true;
+            try {
+                const response = await fetch(`/api/projects/${selectedProjectId}/share`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                document.getElementById('share-url-input').value = '';
+                document.getElementById('share-panel').classList.add('hidden');
+                setProjectsStatus('Enlace desactivado. Ya no se puede abrir ni copiar este proyecto desde ese enlace.');
+                await refreshSavedProjects();
+            } catch (error) {
+                setShareStatus(`No se pudo desactivar el enlace: ${error.message}`, true);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function copySharedProject(token) {
+            if (!currentUser) {
+                pendingShareToken = token;
+                setAccountMode('login');
+                openAccountModal();
+                setAccountStatus('Inicia sesión o crea una cuenta. Después guardaremos una copia editable en tus proyectos.');
+                return;
+            }
+            const button = document.getElementById('shared-project-copy-button');
+            button.disabled = true;
+            try {
+                const response = await fetch(`/api/shared-projects/${encodeURIComponent(token)}/copy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                if (!Number.isSafeInteger(Number(result.id)) || !result.name || !result.components) {
+                    throw new Error('El servidor devolvió una copia no válida.');
+                }
+                pendingShareToken = null;
+                await refreshSavedProjects();
+                openSavedProject(result);
+                document.getElementById('shared-project-banner').classList.add('hidden');
+                const url = new URL(window.location.href);
+                url.searchParams.delete('share');
+                window.history.replaceState({}, '', url);
+                sharedProjectToken = null;
+            } catch (error) {
+                document.getElementById('shared-project-description').textContent =
+                    `No se pudo guardar una copia: ${error.message}`;
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function loadSharedProjectFromUrl() {
+            const token = new URLSearchParams(window.location.search).get('share');
+            if (!token) return;
+            sharedProjectToken = token;
+            try {
+                const response = await fetch(`/api/shared-projects/${encodeURIComponent(token)}`);
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+                const project = result.project;
+                if (!project || !['desktop', 'laptop', 'mobile'].includes(project.device)
+                    || typeof project.name !== 'string' || !project.components || typeof project.components !== 'object') {
+                    throw new Error('La configuración compartida no es válida.');
+                }
+                suppressAutosave = true;
+                try {
+                    selectDeviceType(project.device);
+                    ['cpu', 'mobo', 'ram', 'gpu', 'psu'].forEach(part => {
+                        document.getElementById(`select-${part}`).value = project.components[part] || '';
+                    });
+                    updateBuild();
+                    selectedProjectId = null;
+                    document.getElementById('project-name').value = project.name;
+                    updateProjectSwitcher();
+                } finally {
+                    suppressAutosave = false;
+                }
+                document.getElementById('shared-project-title').textContent = project.name;
+                document.getElementById('shared-project-description').textContent =
+                    'Proyecto compartido: guarda una copia en tu cuenta para editarla. El original de quien lo compartió no se modifica.';
+                document.getElementById('shared-project-copy-button').classList.remove('hidden');
+                document.getElementById('shared-project-banner').classList.remove('hidden');
+                showSection('modulo1');
+                setBuilderView('components');
+            } catch (error) {
+                document.getElementById('shared-project-title').textContent = 'No se pudo abrir el proyecto';
+                document.getElementById('shared-project-description').textContent = error.message;
+                document.getElementById('shared-project-copy-button').classList.add('hidden');
+                document.getElementById('shared-project-banner').classList.remove('hidden');
+                showSection('modulo1');
+            }
+        }
+
+        function scheduleProjectAutosave() {
+            if (suppressAutosave) return;
+            if (!currentUser) {
+                setProjectSaveStatus('Inicia sesión para guardar tus cambios', true);
+                return;
+            }
+            if (autosaveTimer) clearTimeout(autosaveTimer);
+            setProjectSaveStatus('Cambios pendientes de guardado…');
+            autosaveTimer = setTimeout(() => {
+                autosaveTimer = null;
+                saveCurrentProject(true);
+            }, 900);
+        }
+
+        function openSavedProject(project) {
+            suppressAutosave = true;
+            try {
+                selectDeviceType(project.device);
+                ['cpu', 'mobo', 'ram', 'gpu', 'psu'].forEach(part => {
+                    document.getElementById(`select-${part}`).value = project.components?.[part] || '';
+                });
+                updateBuild();
+                selectedProjectId = project.id;
+                document.getElementById('project-name').value = project.name;
+                document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar cambios';
+                document.getElementById('share-url-input').value = '';
+                document.getElementById('share-panel').classList.toggle('hidden', !project.is_shared);
+                if (project.is_shared) {
+                    setShareStatus('Este proyecto tiene un enlace activo. Al crear uno nuevo, el anterior dejará de funcionar.');
+                }
+                updateProjectSwitcher();
+                setProjectsStatus(`Proyecto "${project.name}" abierto. Solo tu cuenta puede editarlo.`);
+                setProjectSaveStatus('Proyecto guardado');
+                closeAccountModal(false);
+                showSection('modulo1');
+                setBuilderView('components');
+            } catch (error) {
+                setProjectsStatus(`No se pudo abrir el proyecto: ${error.message}`, true);
+                setProjectSaveStatus(`No se pudo abrir el proyecto: ${error.message}`, true);
+            } finally {
+                suppressAutosave = false;
+            }
+        }
+
+        function startNewProject() {
+            if (autosaveTimer) clearTimeout(autosaveTimer);
+            autosaveTimer = null;
+            selectedProjectId = null;
+            document.getElementById('project-name').value = `Proyecto #${savedProjectCount + 1}`;
+            document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto actual';
+            document.getElementById('share-url-input').value = '';
+            document.getElementById('share-panel').classList.add('hidden');
+            suppressAutosave = true;
+            try {
+                selectDeviceType('desktop');
+                ['cpu', 'mobo', 'ram', 'gpu', 'psu'].forEach(part => {
+                    document.getElementById(`select-${part}`).value = '';
+                });
+                updateBuild();
+            } finally {
+                suppressAutosave = false;
+            }
+            updateProjectSwitcher();
+            setProjectsStatus('Configuración nueva lista para guardar.');
+            closeAccountModal(false);
+            showSection('modulo1');
+            setBuilderView('components');
+            requestAnimationFrame(() => {
+                document.getElementById('builder-workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
         function setAccountStatus(message, isError = false) {
             const status = document.getElementById('account-status');
             status.textContent = message;
@@ -4417,10 +4756,34 @@
             document.getElementById('account-password-confirm').required = registering;
             document.getElementById('account-password').minLength = registering ? 12 : 1;
             document.getElementById('account-password').autocomplete = registering ? 'new-password' : 'current-password';
+            document.getElementById('account-password-help').classList.toggle('hidden', !registering);
             document.getElementById('account-submit').textContent = registering ? 'Crear cuenta' : 'Iniciar sesión';
             setAccountStatus(registering
-                ? 'Usa un correo válido y una contraseña de mínimo 12 caracteres.'
-                : 'Inicia sesión para ver tus proyectos o crea una cuenta nueva.');
+                ? 'Completa tus datos para crear una cuenta privada.'
+                : 'Escribe el correo y la contraseña de tu cuenta.');
+        }
+
+        function openAccountModal() {
+            const backdrop = document.getElementById('account-modal-backdrop');
+            backdrop.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('account-modal-open');
+            document.getElementById('account-open-button').setAttribute('aria-expanded', 'true');
+            requestAnimationFrame(() => {
+                if (currentUser) document.getElementById('account-close-button').focus();
+                else if (accountMode === 'register') document.getElementById('account-display-name').focus();
+                else document.getElementById('account-email').focus();
+            });
+            if (currentUser) refreshSavedProjects();
+        }
+
+        function closeAccountModal(restoreFocus = true) {
+            const backdrop = document.getElementById('account-modal-backdrop');
+            if (backdrop.getAttribute('aria-hidden') === 'true') return;
+            backdrop.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('account-modal-open');
+            const accountButton = document.getElementById('account-open-button');
+            accountButton.setAttribute('aria-expanded', 'false');
+            (restoreFocus ? accountButton : document.getElementById('current-project-select')).focus({ preventScroll: true });
         }
 
         function updateAccountView() {
@@ -4440,15 +4803,21 @@
                 currentUser ? `Cuenta de ${currentUser.displayName}` : 'Mi cuenta'
             );
             if (!signedIn) {
+                if (autosaveTimer) clearTimeout(autosaveTimer);
+                autosaveTimer = null;
                 selectedProjectId = null;
                 loadedSavedProjects = [];
+                savedProjectCount = 0;
                 document.getElementById('saved-projects-list').replaceChildren();
                 document.getElementById('load-more-projects-button').classList.add('hidden');
                 document.getElementById('project-name').value = '';
                 document.getElementById('save-project-button').innerHTML =
                     '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto';
+                document.getElementById('share-url-input').value = '';
+                document.getElementById('share-panel').classList.add('hidden');
                 setProjectsStatus('Inicia sesión para ver y guardar tus proyectos.');
             }
+            updateProjectSwitcher();
         }
 
         async function refreshAccount() {
@@ -4500,6 +4869,7 @@
                 updateAccountView();
                 setAccountStatus(`Hola, ${currentUser.displayName}. Tus proyectos solo son visibles para ti.`);
                 await refreshSavedProjects();
+                if (pendingShareToken) await copySharedProject(pendingShareToken);
             } catch (error) {
                 if (error.message.includes('Inicia sesión')) {
                     currentUser = null;
@@ -4543,47 +4913,34 @@
             if (!append) list.replaceChildren();
             if (!append && !projects.length) {
                 const emptyMessage = document.createElement('p');
-                emptyMessage.className = 'text-[10px] text-slate-500';
-                emptyMessage.textContent = 'Todavía no hay proyectos guardados.';
+                emptyMessage.className = 'rounded-lg border border-dashed border-slate-700 px-3 py-5 text-center text-xs text-slate-400';
+                emptyMessage.textContent = 'Todavía no tienes proyectos guardados. Configura tu equipo y pulsa “Guardar proyecto actual”.';
                 list.appendChild(emptyMessage);
                 return;
             }
 
             const deviceNames = { desktop: 'PC de escritorio', laptop: 'Laptop', mobile: 'Móvil' };
             projects.forEach(project => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between gap-2 rounded-md border border-slate-800 bg-slate-900 px-2.5 py-2';
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'saved-project-card flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-900 px-3 py-3 transition hover:border-sky-300/50 hover:bg-slate-800';
                 const details = document.createElement('div');
                 details.className = 'min-w-0';
                 const name = document.createElement('p');
-                name.className = 'truncate text-[10px] font-semibold text-slate-200';
+                name.className = 'truncate text-sm font-semibold text-slate-100';
                 name.textContent = project.name;
                 const metadata = document.createElement('p');
-                metadata.className = 'mt-0.5 text-[9px] text-slate-500';
+                metadata.className = 'mt-1 text-[11px] text-slate-400';
                 const updatedAt = new Date(project.updated_at);
                 const updatedLabel = Number.isNaN(updatedAt.getTime()) ? '' : updatedAt.toLocaleDateString('es-CO');
                 metadata.textContent = `${deviceNames[project.device] || 'Equipo'}${updatedLabel ? ` · ${updatedLabel}` : ''}`;
-                const openButton = document.createElement('button');
-                openButton.type = 'button';
-                openButton.className = 'shrink-0 rounded border border-sky-400/30 px-2 py-1 text-[9px] font-semibold text-sky-200 hover:bg-sky-400/10';
-                openButton.textContent = 'Abrir';
-                openButton.addEventListener('click', () => {
-                    try {
-                        selectDeviceType(project.device);
-                        ['cpu', 'mobo', 'ram', 'gpu', 'psu'].forEach(part => {
-                            document.getElementById(`select-${part}`).value = project.components?.[part] || '';
-                        });
-                        updateBuild();
-                        selectedProjectId = project.id;
-                        document.getElementById('project-name').value = project.name;
-                        document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar cambios';
-                        setProjectsStatus(`Proyecto "${project.name}" abierto. Solo tu cuenta puede editarlo.`);
-                    } catch (error) {
-                        setProjectsStatus(`No se pudo abrir el proyecto: ${error.message}`, true);
-                    }
-                });
+                const openLabel = document.createElement('span');
+                openLabel.className = 'shrink-0 rounded-lg border border-sky-400/30 px-3 py-2 text-xs font-semibold text-sky-200';
+                openLabel.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square mr-1.5" aria-hidden="true"></i>Abrir';
+                item.setAttribute('aria-label', `Abrir proyecto ${project.name} en el configurador`);
+                item.addEventListener('click', () => openSavedProject(project));
                 details.append(name, metadata);
-                item.append(details, openButton);
+                item.append(details, openLabel);
                 list.appendChild(item);
             });
         }
@@ -4602,13 +4959,16 @@
                     }
                     throw new Error(result.error || `Error HTTP ${response.status}`);
                 }
-                if (!Array.isArray(result.projects) || typeof result.hasMore !== 'boolean') {
+                if (!Array.isArray(result.projects) || typeof result.hasMore !== 'boolean'
+                    || !Number.isSafeInteger(result.total) || result.total < 0) {
                     throw new Error('El servidor devolvió una lista de proyectos no válida.');
                 }
+                savedProjectCount = result.total;
                 loadedSavedProjects = append
                     ? [...loadedSavedProjects, ...result.projects]
                     : result.projects;
                 renderSavedProjects(result.projects, append);
+                updateProjectSwitcher();
                 document.getElementById('load-more-projects-button').classList.toggle('hidden', !result.hasMore);
                 setProjectsStatus(loadedSavedProjects.length
                     ? `${loadedSavedProjects.length} proyecto(s) privado(s) cargado(s).`
@@ -4624,21 +4984,32 @@
             }
         }
 
-        async function saveCurrentProject() {
+        async function saveCurrentProject(automatic = false) {
             if (!currentUser) {
-                setProjectsStatus('Inicia sesión o crea una cuenta para guardar proyectos.', true);
+                const message = 'Inicia sesión o crea una cuenta para guardar proyectos.';
+                setProjectsStatus(message, true);
+                setProjectSaveStatus(message, true);
                 return;
             }
-            const name = document.getElementById('project-name').value.trim();
-            if (!name) {
-                setProjectsStatus('Escribe un nombre antes de guardar el proyecto.', true);
-                document.getElementById('project-name').focus();
+            if (saveInProgress) {
+                autosavePending = true;
                 return;
             }
 
+            let name = document.getElementById('project-name').value.trim();
+            if (!name) {
+                name = `Proyecto #${savedProjectCount + 1}`;
+                document.getElementById('project-name').value = name;
+            }
+
+            saveInProgress = true;
             const button = document.getElementById('save-project-button');
+            const toolbarButton = document.getElementById('project-save-button');
             button.disabled = true;
+            toolbarButton.disabled = true;
+            document.getElementById('current-project-select').disabled = true;
             setProjectsStatus('Guardando en tus proyectos privados…');
+            setProjectSaveStatus(automatic ? 'Autoguardando…' : 'Guardando…');
             const components = Object.fromEntries(
                 ['cpu', 'mobo', 'ram', 'gpu', 'psu'].map(part => [
                     part,
@@ -4665,11 +5036,23 @@
                 document.getElementById('project-name').value = result.name;
                 button.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar cambios';
                 await refreshSavedProjects();
-                setProjectsStatus(isEditing ? 'Cambios guardados en tu cuenta.' : 'Proyecto guardado en tu cuenta.');
+                const savedMessage = isEditing
+                    ? `Cambios de "${result.name}" guardados.`
+                    : `"${result.name}" guardado en tus proyectos.`;
+                setProjectsStatus(savedMessage);
+                setProjectSaveStatus(automatic ? `Autoguardado · ${result.name}` : `Guardado · ${result.name}`);
             } catch (error) {
                 setProjectsStatus(`No se pudo guardar el proyecto: ${error.message}`, true);
+                setProjectSaveStatus(`Error al guardar: ${error.message}`, true);
             } finally {
+                saveInProgress = false;
                 button.disabled = false;
+                toolbarButton.disabled = !currentUser;
+                document.getElementById('current-project-select').disabled = !currentUser;
+                if (autosavePending) {
+                    autosavePending = false;
+                    scheduleProjectAutosave();
+                }
             }
         }
 
@@ -5067,36 +5450,87 @@
             button.addEventListener('click', () => showSection(button.dataset.section));
         });
         document.querySelectorAll('[data-device]').forEach(button => {
-            button.addEventListener('click', () => selectDeviceType(button.dataset.device));
+            button.addEventListener('click', () => {
+                selectDeviceType(button.dataset.device);
+                scheduleProjectAutosave();
+            });
         });
         document.querySelectorAll('#select-cpu, #select-mobo, #select-ram, #select-gpu, #select-psu').forEach(select => {
-            select.addEventListener('change', () => updateBuild(select.id.replace('select-', '')));
+            select.addEventListener('change', () => {
+                updateBuild(select.id.replace('select-', ''));
+                scheduleProjectAutosave();
+            });
+        });
+        document.getElementById('current-project-select').addEventListener('change', event => {
+            if (event.target.value === 'new') {
+                startNewProject();
+                return;
+            }
+            const project = loadedSavedProjects.find(item => String(item.id) === event.target.value);
+            if (project) openSavedProject(project);
+        });
+        document.getElementById('project-save-button').addEventListener('click', () => saveCurrentProject(false));
+        document.getElementById('project-share-button').addEventListener('click', createProjectShareLink);
+        document.getElementById('shared-project-copy-button').addEventListener('click', () => {
+            if (sharedProjectToken) copySharedProject(sharedProjectToken);
+        });
+        document.getElementById('copy-share-link-button').addEventListener('click', async () => {
+            const input = document.getElementById('share-url-input');
+            if (!input.value) {
+                setShareStatus('Primero genera un enlace para compartir.', true);
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(input.value);
+                setShareStatus('Enlace copiado. Ya puedes enviarlo.');
+            } catch (_error) {
+                input.focus();
+                input.select();
+                setShareStatus('No se pudo copiar automáticamente. Selecciona y copia el enlace manualmente.', true);
+            }
+        });
+        document.getElementById('revoke-share-link-button').addEventListener('click', revokeProjectShareLink);
+        document.getElementById('project-name').addEventListener('input', event => {
+            const currentOption = [...document.getElementById('current-project-select').options]
+                .find(option => option.value === (selectedProjectId === null ? 'new' : String(selectedProjectId)));
+            if (currentOption) currentOption.textContent = event.target.value.trim() || `Proyecto #${savedProjectCount + 1}`;
+            scheduleProjectAutosave();
         });
         document.getElementById('account-open-button').addEventListener('click', () => {
-            showSection('modulo1');
-            setBuilderView('components');
-            requestAnimationFrame(() => {
-                document.getElementById('account-heading').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                if (!currentUser) document.getElementById('account-email').focus({ preventScroll: true });
-            });
+            openAccountModal();
+        });
+        document.getElementById('account-close-button').addEventListener('click', () => closeAccountModal());
+        document.getElementById('account-modal-backdrop').addEventListener('click', event => {
+            if (event.target === event.currentTarget) closeAccountModal();
+        });
+        document.addEventListener('keydown', event => {
+            const backdrop = document.getElementById('account-modal-backdrop');
+            if (backdrop.getAttribute('aria-hidden') === 'true') return;
+            if (event.key === 'Escape') {
+                closeAccountModal();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = [...document.getElementById('account-dialog').querySelectorAll('button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])')]
+                .filter(element => !element.closest('.hidden'));
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
         });
         document.getElementById('account-login-tab').addEventListener('click', () => setAccountMode('login'));
         document.getElementById('account-register-tab').addEventListener('click', () => setAccountMode('register'));
         document.getElementById('account-form').addEventListener('submit', handleAccountSubmit);
         document.getElementById('account-logout-button').addEventListener('click', logoutAccount);
-        document.getElementById('save-project-button').addEventListener('click', saveCurrentProject);
+        document.getElementById('save-project-button').addEventListener('click', () => saveCurrentProject(false));
         document.getElementById('load-more-projects-button').addEventListener('click', () => refreshSavedProjects(true));
-        document.getElementById('new-project-button').addEventListener('click', () => {
-            selectedProjectId = null;
-            document.getElementById('project-name').value = '';
-            document.getElementById('save-project-button').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i>Guardar proyecto';
-            selectDeviceType('desktop');
-            ['cpu', 'mobo', 'ram', 'gpu', 'psu'].forEach(part => {
-                document.getElementById(`select-${part}`).value = '';
-            });
-            updateBuild();
-            setProjectsStatus('Configuración nueva lista para guardar.');
-        });
+        document.getElementById('new-project-button').addEventListener('click', startNewProject);
         document.getElementById('chat-form').addEventListener('submit', handleChatSubmit);
         const assistantWelcomeMessage = '¡Hola! Soy tu asistente. Te ayudaré a elegir y revisar los componentes de tu PC.';
         document.getElementById('portal-assistant-listen').addEventListener('click', () => announceAssistant(assistantWelcomeMessage));
@@ -5283,7 +5717,7 @@
         updateBuild();
         setAccountMode('login');
         updateAccountView();
-        refreshAccount();
+        refreshAccount().then(loadSharedProjectFromUrl);
         setupCatalog.forEach((group, index) => {
             const option = document.createElement('option');
             option.value = String(index);

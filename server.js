@@ -24,6 +24,10 @@ const scrypt = promisify(crypto.scrypt);
 const sessionSecret = process.env.SESSION_SECRET;
 const dummyPasswordHash = `${Buffer.alloc(16).toString('hex')}:${Buffer.alloc(64).toString('hex')}`;
 
+function hashShareToken(token) {
+    return crypto.createHash('sha256').update(token).digest('hex');
+}
+
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '8kb' }));
@@ -115,6 +119,12 @@ const limitProjectChanges = createRateLimiter({
     windowMs: 60 * 1000,
     message: 'Alcanzaste el límite temporal de guardados. Intenta de nuevo en un minuto.',
     keyPrefix: 'projects'
+});
+const limitSharedProjectReads = createRateLimiter({
+    limit: 60,
+    windowMs: 60 * 1000,
+    message: 'Demasiadas consultas a proyectos compartidos. Intenta de nuevo en un minuto.',
+    keyPrefix: 'shared-projects'
 });
 
 function requireAuthentication(request, response, next) {
@@ -294,11 +304,68 @@ app.get('/api/projects', requireDatabase, requireAuthentication, async (request,
         return;
     }
     try {
+        const [result, countResult] = await Promise.all([
+            database.query(
+                'SELECT id, name, device, components, created_at, updated_at, (share_token_hash IS NOT NULL) AS is_shared FROM projects WHERE owner_id = $1 ORDER BY updated_at DESC LIMIT 101 OFFSET $2',
+                [request.session.user.id, offset]
+            ),
+            database.query(
+                'SELECT COUNT(*)::int AS total FROM projects WHERE owner_id = $1',
+                [request.session.user.id]
+            )
+        ]);
+        response.json({
+            projects: result.rows.slice(0, 100),
+            hasMore: result.rows.length > 100,
+            total: countResult.rows[0].total
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/shared-projects/:token', requireDatabase, limitSharedProjectReads, async (request, response, next) => {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(request.params.token)) {
+        response.status(404).json({ error: 'El enlace compartido no es válido o ya fue desactivado.' });
+        return;
+    }
+    try {
         const result = await database.query(
-            'SELECT id, name, device, components, created_at, updated_at FROM projects WHERE owner_id = $1 ORDER BY updated_at DESC LIMIT 101 OFFSET $2',
-            [request.session.user.id, offset]
+            'SELECT name, device, components FROM projects WHERE share_token_hash = $1',
+            [hashShareToken(request.params.token)]
         );
-        response.json({ projects: result.rows.slice(0, 100), hasMore: result.rows.length > 100 });
+        if (!result.rowCount) {
+            response.status(404).json({ error: 'El enlace compartido no es válido o ya fue desactivado.' });
+            return;
+        }
+        response.set('Cache-Control', 'no-store');
+        response.json({ project: result.rows[0] });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/shared-projects/:token/copy', requireDatabase, requireSameOrigin, requireAuthentication, limitProjectChanges, async (request, response, next) => {
+    if (!/^[A-Za-z0-9_-]{43}$/.test(request.params.token)) {
+        response.status(404).json({ error: 'El enlace compartido no es válido o ya fue desactivado.' });
+        return;
+    }
+    try {
+        const source = await database.query(
+            'SELECT name, device, components FROM projects WHERE share_token_hash = $1',
+            [hashShareToken(request.params.token)]
+        );
+        if (!source.rowCount) {
+            response.status(404).json({ error: 'El enlace compartido no es válido o ya fue desactivado.' });
+            return;
+        }
+        const project = source.rows[0];
+        const copyName = `Copia de ${project.name}`.slice(0, 80);
+        const result = await database.query(
+            'INSERT INTO projects (owner_id, name, device, components) VALUES ($1, $2, $3, $4::jsonb) RETURNING id, name, device, components, created_at, updated_at, FALSE AS is_shared',
+            [request.session.user.id, copyName, project.device, JSON.stringify(project.components)]
+        );
+        response.status(201).json(result.rows[0]);
     } catch (error) {
         next(error);
     }
@@ -316,6 +383,49 @@ app.post('/api/projects', requireDatabase, requireSameOrigin, requireAuthenticat
             [request.session.user.id, request.body.name.trim(), request.body.device, JSON.stringify(request.body.components)]
         );
         response.status(201).json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/projects/:id/share', requireDatabase, requireSameOrigin, requireAuthentication, limitProjectChanges, async (request, response, next) => {
+    const projectId = Number(request.params.id);
+    if (!Number.isSafeInteger(projectId) || projectId < 1) {
+        response.status(400).json({ error: 'El identificador del proyecto no es válido.' });
+        return;
+    }
+    const token = crypto.randomBytes(32).toString('base64url');
+    try {
+        const result = await database.query(
+            'UPDATE projects SET share_token_hash = $1 WHERE id = $2 AND owner_id = $3 RETURNING id',
+            [hashShareToken(token), projectId, request.session.user.id]
+        );
+        if (!result.rowCount) {
+            response.status(404).json({ error: 'No se encontró ese proyecto en tu cuenta.' });
+            return;
+        }
+        response.status(201).json({ token });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.delete('/api/projects/:id/share', requireDatabase, requireSameOrigin, requireAuthentication, limitProjectChanges, async (request, response, next) => {
+    const projectId = Number(request.params.id);
+    if (!Number.isSafeInteger(projectId) || projectId < 1) {
+        response.status(400).json({ error: 'El identificador del proyecto no es válido.' });
+        return;
+    }
+    try {
+        const result = await database.query(
+            'UPDATE projects SET share_token_hash = NULL WHERE id = $1 AND owner_id = $2 RETURNING id',
+            [projectId, request.session.user.id]
+        );
+        if (!result.rowCount) {
+            response.status(404).json({ error: 'No se encontró ese proyecto en tu cuenta.' });
+            return;
+        }
+        response.json({ ok: true });
     } catch (error) {
         next(error);
     }
@@ -398,7 +508,12 @@ async function start() {
             ALTER TABLE projects
             ADD COLUMN IF NOT EXISTS owner_id BIGINT REFERENCES users(id) ON DELETE CASCADE
         `);
+        await database.query(`
+            ALTER TABLE projects
+            ADD COLUMN IF NOT EXISTS share_token_hash TEXT
+        `);
         await database.query('CREATE INDEX IF NOT EXISTS projects_owner_updated_idx ON projects (owner_id, updated_at DESC)');
+        await database.query('CREATE UNIQUE INDEX IF NOT EXISTS projects_share_token_hash_idx ON projects (share_token_hash) WHERE share_token_hash IS NOT NULL');
     } else {
         console.warn('DATABASE_URL no está configurada. El sitio funciona, pero las cuentas y proyectos requieren una base de datos.');
     }
