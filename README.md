@@ -16,11 +16,13 @@ Si no configuras `DATABASE_URL`, la página se puede visualizar, pero la API de 
 Necesitarás una cuenta de GitHub y una de Render. No compartas contraseñas ni pegues la URL de conexión de PostgreSQL en el código o en GitHub.
 
 1. Crea un repositorio **privado** en GitHub y sube los archivos del proyecto. No subas `node_modules` ni `.env`; ya están excluidos por `.gitignore`.
-2. En Render, crea una base **PostgreSQL**. Revisa el plan, el costo, la duración de conservación y las copias de seguridad antes de confirmarla.
+2. En Render, crea una base **PostgreSQL**. La base gratuita tiene 1 GB, no incluye copias de seguridad y expira a los 30 días; después hay 14 días para actualizarla antes de que Render elimine los datos. Para guardar proyectos a largo plazo, elige una base de pago y confirma su costo mensual antes de crearla. Consulta los [límites del plan gratuito](https://render.com/docs/free).
 3. En Render, crea un **Web Service** conectado al repositorio, en la misma región de la base de datos. Usa `npm install` como comando de compilación y `npm start` como comando de inicio.
 4. En las variables de entorno del servicio, agrega `DATABASE_URL` con la **Internal Database URL** que muestra Render. No la publiques ni la pongas en archivos versionados. Puedes dejar `DATABASE_SSL` sin configurar al usar la URL interna.
 5. Espera el despliegue y abre `/api/health` en el dominio asignado por Render. Debe responder `{"status":"ok"}`. Al iniciar, el servidor crea la tabla necesaria automáticamente.
 6. Comparte el dominio `onrender.com`. Las configuraciones guardadas se podrán abrir y modificar desde cualquier dispositivo.
+
+El servicio web gratuito se duerme tras 15 minutos sin tráfico y puede tardar alrededor de un minuto en iniciar con la siguiente visita.
 
 ## Importante sobre el acceso público
 
